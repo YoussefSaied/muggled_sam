@@ -144,6 +144,7 @@ class SAMV2ImageEncoder(nn.Module):
         max_side_length=1024,
         use_square_sizing=True,
         pad_to_square=False,
+        bgr_rgb=False
     ) -> Tensor:
         """
         Helper used to convert opencv-formatted images (e.g. from loading: cv2.imread(path_to_image)
@@ -167,8 +168,11 @@ class SAMV2ImageEncoder(nn.Module):
             scaled_w = int(np.ceil(img_w * scale_factor / tiling_size)) * tiling_size
 
         # Scale RGB image to correct size and re-order from HWC to BCHW (with batch of 1)
-        image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
-        scaled_hwc = cv2.resize(image_rgb, dsize=(scaled_w, scaled_h))
+        if bgr_rgb: 
+            image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
+        else:
+            image_rgb = image_bgr
+        scaled_hwc = cv2.resize(image_rgb, dsize=(scaled_w, scaled_h), interpolation=cv2.INTER_NEAREST)
         scaled_bchw = np.expand_dims(np.transpose(scaled_hwc, (2, 0, 1)), 0)
 
         # Move the image over to the pytorch for final pre-processing steps

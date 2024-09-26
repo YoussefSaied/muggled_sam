@@ -20,3 +20,4 @@ env/
 ignore/
 saved_images/
 
+tmp*
